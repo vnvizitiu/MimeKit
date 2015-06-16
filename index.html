@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Mimekit by jstedfast</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Mimekit</h1>
+        <h2>A cross-platform .NET MIME creation and parser library with support for S/MIME, PGP, DKIM, TNEF and Unix mbox spools.</h2>
+        <a href="https://github.com/jstedfast/MimeKit" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="mimekit" class="anchor" href="#mimekit" aria-hidden="true"><span class="octicon octicon-link"></span></a>MimeKit</h1>
+
+<p><a href="https://scan.coverity.com/projects/3201">
+  <img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/3201/badge.svg">
+</a></p>
+
+<h2>
+<a id="what-is-mimekit" class="anchor" href="#what-is-mimekit" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is MimeKit?</h2>
+
+<p>MimeKit is a C# library which may be used for the creation and parsing of messages using the Multipurpose Internet Mail Extension (MIME), as defined by <a href="https://github.com/jstedfast/MimeKit/blob/master/RFCs.md">numerous IETF specifications</a>.</p>
+
+<h2>
+<a id="history" class="anchor" href="#history" aria-hidden="true"><span class="octicon octicon-link"></span></a>History</h2>
+
+<p>As a developer and user of email clients, I had come to realize that the vast majority of email client
+(and server) software had less-than-satisfactory MIME implementations. More often than not these email clients
+created broken MIME messages and/or would incorrectly try to parse a MIME message thus subtracting from the full
+benefits that MIME was meant to provide. MimeKit is meant to address this issue by following the MIME specification
+as closely as possible while also providing programmers with an extremely easy to use high-level API.</p>
+
+<p>This led me, at first, to implement another MIME parser library called <a href="http://spruce.sourceforge.net/gmime">GMime</a>
+which is implemented in C and later added a C# binding called GMime-Sharp.</p>
+
+<p>Now that I typically find myself working in C# rather than lower level languages like C, I decided to
+begin writing a new parser in C# which would not depend on GMime. This would also allow me to have more
+flexibility in that I'd be able use Generics and create a more .NET-compliant API.</p>
+
+<h2>
+<a id="performance" class="anchor" href="#performance" aria-hidden="true"><span class="octicon octicon-link"></span></a>Performance</h2>
+
+<p>While mainstream beliefs may suggest that C# can never be as fast as C, it turns out that with a bit of creative
+parser design and a few clever optimizations 
+<sup>[<a href="http://jeffreystedfast.blogspot.com/2013/09/optimization-tips-tricks-used-by.html">1</a>]
+[<a href="http://jeffreystedfast.blogspot.com/2013/10/optimization-tips-tricks-used-by.html">2</a>]</sup>, MimeKit's performance
+is actually <a href="http://jeffreystedfast.blogspot.com/2014/03/gmime-gets-speed-boost.html">on par with GMime</a>.</p>
+
+<p>Since GMime is pretty well-known as a high-performance native MIME parser and MimeKit more-or-less matches GMime's
+performance, it stands to reason that MimeKit is likely unsurpassed in performance in the .NET MIME parser space.</p>
+
+<p>For a comparison, as I <a href="http://jeffreystedfast.blogspot.com/2013/10/optimization-tips-tricks-used-by.html">blogged here</a>
+(I have since optimized MimeKit by at least another 30%), MimeKit is more than 25x faster than OpenPOP.NET, 75x faster
+than SharpMimeTools, and 65x faster than regex-based parsers. Even the commercial MIME parser offerings such as LimiLabs'
+Mail.dll and NewtonIdeas' Mime4Net cannot even come close to matching MimeKit's performance (they are both orders of
+magnitude slower than MimeKit).</p>
+
+<p>For comparison purposes, I've published a <a href="https://github.com/jstedfast/MimeParserBenchmark">MIME parser benchmark</a>
+to make it easier for anyone else to compare the performance of MimeKit to their favourite MIME parser.</p>
+
+<p>Here are the results:</p>
+
+<pre><code>Parsing startrek.msg (1000 iterations):
+MimeKit:        0.6989221 seconds
+OpenPop:        25.3056064 seconds
+AE.Net.Mail:    17.5971438 seconds
+MailSystem.NET: 26.3891218 seconds
+MIMER:          76.4538978 seconds
+
+Parsing xamarin3.msg (1000 iterations):
+MimeKit:        3.4215505 seconds
+OpenPop:        159.3308053 seconds
+AE.Net.Mail:    132.3044291 seconds
+MailSystem.NET: 133.5832078 seconds
+MIMER:          784.433441 seconds
+</code></pre>
+
+<p>How does your MIME parser compare?</p>
+
+<h2>
+<a id="license-information" class="anchor" href="#license-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>License Information</h2>
+
+<p>MimeKit is Copyright (C) 2012-2015 Xamarin Inc. and is licensed under the MIT license:</p>
+
+<pre><code>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+</code></pre>
+
+<h2>
+<a id="installing-via-nuget" class="anchor" href="#installing-via-nuget" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installing via NuGet</h2>
+
+<p>The easiest way to install MimeKit is via <a href="https://www.nuget.org/packages/MimeKit/">NuGet</a>.</p>
+
+<p>In Visual Studio's <a href="http://docs.nuget.org/docs/start-here/using-the-package-manager-console">Package Manager Console</a>,
+simply enter the following command:</p>
+
+<pre><code>Install-Package MimeKit
+</code></pre>
+
+<h2>
+<a id="building" class="anchor" href="#building" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building</h2>
+
+<p>First, you'll need to clone MimeKit and Bouncy Castle from my GitHub repository:</p>
+
+<pre><code>git clone https://github.com/jstedfast/MimeKit.git
+git clone https://github.com/jstedfast/bc-csharp.git
+git clone https://github.com/jstedfast/Portable.Text.Encoding.git
+</code></pre>
+
+<p>Currently, MimeKit depends on the vs2010 branch of bc-csharp for the Visual Studio 2010 project
+files that I've added (to replace the Visual Studio 2003 project files). To switch to that branch,</p>
+
+<pre><code>cd bc-csharp
+git checkout -b vs2010 origin/vs2010
+</code></pre>
+
+<p>In the top-level MimeKit source directory, there are several solution files:</p>
+
+<ul>
+<li>MimeKit.sln includes projects for .NET 4.5, .NET 4.0, PCL (Profile7 and Profile111), Xamarin.Android, Xamarin.iOS, and Xamarin.Mac as well as the unit tests.</li>
+<li>MimeKit.Mobile.sln just includes the Xamarin.Android and Xamarin.iOS projects.</li>
+<li>MimeKit.Net40.sln just includes the .NET 4.0 project.</li>
+</ul>
+
+<p>If you don't have the Xamarin products, you'll probably want to open the MimeKit.Net40.sln instead of MimeKit.sln.</p>
+
+<p>Once you've opened the appropriate MimeKit solution file in either Xamarin Studio or Visual Studio 2010+ (either will work),
+you can simply choose the Debug or Release build configuration and then build.</p>
+
+<p>Note: The Release build will generate the xml API documentation, but the Debug build will not.</p>
+
+<h2>
+<a id="using-mimekit" class="anchor" href="#using-mimekit" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using MimeKit</h2>
+
+<h3>
+<a id="parsing-messages" class="anchor" href="#parsing-messages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parsing Messages</h3>
+
+<p>One of the more common operations that MimeKit is meant for is parsing email messages from arbitrary streams.
+There are two ways of accomplishing this task.</p>
+
+<p>The first way is to use one of the <code>Load()</code> methods on <code>MimeKit.MimeMessage</code>:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-c">// Load a MimeMessage from a stream</span>
+<span class="pl-k">var</span> message = MimeMessage.Load (stream);</pre></div>
+
+<p>The second way is to use the <code>MimeParser</code> class. For the most part, using the <code>MimeParser</code> directly is not necessary
+unless you wish to parse a Unix mbox file stream. However, this is how you would do it:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-c">// Load a MimeMessage from a stream</span>
+<span class="pl-k">var</span> parser = <span class="pl-k">new</span> MimeParser (stream, MimeFormat.Entity);
+<span class="pl-k">var</span> message = parser.ParseMessage ();</pre></div>
+
+<p>For Unix mbox file streams, you would use the parser like this:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-c">// Load every message from a Unix mbox</span>
+<span class="pl-k">var</span> parser = <span class="pl-k">new</span> MimeParser (stream, MimeFormat.Mbox);
+<span class="pl-k">while</span> (!parser.IsEndOfStream) {
+    <span class="pl-k">var</span> message = parser.ParseMessage ();
+
+    <span class="pl-c">// do something with the message</span>
+}</pre></div>
+
+<h3>
+<a id="getting-the-body-of-a-message" class="anchor" href="#getting-the-body-of-a-message" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting the Body of a Message</h3>
+
+<p>A common misunderstanding about email is that there is a well-defined message body and then a list
+of attachments. This is not really the case. The reality is that MIME is a tree structure of content,
+much like a file system.</p>
+
+<p>Luckily, MIME does define a set of general rules for how mail clients should interpret this tree
+structure of MIME parts. The <code>Content-Disposition</code> header is meant to provide hints to the receiving
+client as to which parts are meant to be displayed as part of the message body and which are meant
+to be interpreted as attachments.</p>
+
+<p>The <code>Content-Disposition</code> header will generally have one of two values: <code>inline</code> or <code>attachment</code>.</p>
+
+<p>The meaning of these value should be fairly obvious. If the value is <code>attachment</code>, then the content
+of said MIME part is meant to be presented as a file attachment separate from the core message.
+However, if the value is <code>inline</code>, then the content of that MIME part is meant to be displayed inline
+within the mail client's rendering of the core message body. If the <code>Content-Disposition</code> header does
+not exist, then it should be treated as if the value were <code>inline</code>.</p>
+
+<p>Technically, every part that lacks a <code>Content-Disposition</code> header or that is marked as <code>inline</code>, then,
+is part of the core message body.</p>
+
+<p>There's a bit more to it than that, though.</p>
+
+<p>Modern MIME messages will often contain a <code>multipart/alternative</code> MIME container which will generally contain
+a <code>text/plain</code> and <code>text/html</code> version of the text that the sender wrote. The <code>text/html</code> version is typically
+formatted much closer to what the sender saw in his or her WYSIWYG editor than the <code>text/plain</code> version.</p>
+
+<p>The reason for sending the message text in both formats is that not all mail clients are capable of displaying
+HTML.</p>
+
+<p>The receiving client should only display one of the alternative views contained within the <code>multipart/alternative</code>
+container. Since alternative views are listed in order of least faithful to most faithful with what the sender
+saw in his or her WYSIWYG editor, the receiving client <em>should</em> walk over the list of alternative views starting
+at the end and working backwards until it finds a part that it is capable of displaying.</p>
+
+<p>Example:</p>
+
+<pre><code>multipart/alternative
+  text/plain
+  text/html
+</code></pre>
+
+<p>As seen in the example above, the <code>text/html</code> part is listed last because it is the most faithful to
+what the sender saw in his or her WYSIWYG editor when writing the message.</p>
+
+<p>To make matters even more complicated, sometimes modern mail clients will use a <code>multipart/related</code>
+MIME container instead of a simple <code>text/html</code> part in order to embed images and other content
+within the HTML.</p>
+
+<p>Example:</p>
+
+<pre><code>multipart/alternative
+  text/plain
+  multipart/related
+    text/html
+    image/jpeg
+    video/mp4
+    image/png
+</code></pre>
+
+<p>In the example above, one of the alternative views is a <code>multipart/related</code> container which contains
+an HTML version of the message body that references the sibling video and images.</p>
+
+<p>Now that you have a rough idea of how a message is structured and how to interpret various MIME entities,
+the next step is learning how to traverse the MIME tree using MimeKit.</p>
+
+<p>Note: For your convenience, MimeKit's <code>MimeMessage</code> class has two properties that can help you get the
+<code>text/plain</code> or <code>text/html</code> version of the message body. These are <code>TextBody</code> and <code>HtmlBody</code>,
+respectively.</p>
+
+<p>Keep in mind, however, that at least with the <code>HtmlBody</code> property, it may be that the HTML part is
+a child of a <code>multipart/related</code>, allowing it to refer to images and other types of media that
+are also contained within that <code>multipart/related</code> entity. This property is really only a convenience
+property and is not a really good substitute for traversing the MIME structure yourself so that you
+may properly interpret related content.</p>
+
+<h3>
+<a id="traversing-a-mimemessage" class="anchor" href="#traversing-a-mimemessage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Traversing a MimeMessage</h3>
+
+<p>The <code>MimeMessage.Body</code> is the top-level MIME entity of the message. Generally, it will either be a
+<code>TextPart</code> or a <code>Multipart</code>.</p>
+
+<p>As an example, if you wanted to rip out all of the attachments of a message, your code might look
+something like this:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> attachments = <span class="pl-k">new</span> List&lt;MimePart&gt; ();
+<span class="pl-k">var</span> multiparts = <span class="pl-k">new</span> List&lt;Multipart&gt; ();
+<span class="pl-k">var</span> iter = <span class="pl-k">new</span> MimeIterator (message);
+
+<span class="pl-c">// collect our list of attachments and their parent multiparts</span>
+<span class="pl-k">while</span> (iter.MoveNext ()) {
+    <span class="pl-k">var</span> multipart = iter.Parent <span class="pl-k">as</span> Multipart;
+    <span class="pl-k">var</span> part = iter.Current <span class="pl-k">as</span> MimePart;
+
+    <span class="pl-k">if</span> (multipart != <span class="pl-c1">null</span> &amp;&amp; part != <span class="pl-c1">null</span> &amp;&amp; part.IsAttachment) {
+        <span class="pl-c">// keep track of each attachment's parent multipart</span>
+        multiparts.Add (multipart);
+        attachments.Add (part);
+    }
+}
+
+<span class="pl-c">// now remove each attachment from its parent multipart...</span>
+<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; attachments.Count; i++)
+    multiparts[i].Remove (attachments[i]);</pre></div>
+
+<h3>
+<a id="quick-and-dirty-enumeration-of-message-body-parts" class="anchor" href="#quick-and-dirty-enumeration-of-message-body-parts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick and Dirty Enumeration of Message Body Parts</h3>
+
+<p>If you would rather skip the proper way of traversing a MIME tree, another option that MimeKit provides
+is a simple enumerator over the message's body parts in a flat (depth-first) list.</p>
+
+<p>You can access this flat list via the <code>BodyParts</code> property, like so:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">foreach</span> (<span class="pl-k">var</span> part <span class="pl-k">in</span> message.BodyParts) {
+   <span class="pl-c">// do something</span>
+}</pre></div>
+
+<p>Another helper property on the MimeMessage class is the <code>Attachments</code> property which works
+much the same way as the <code>BodyParts</code> property except that it will only contain MIME parts
+which have a <code>Content-Disposition</code> header value that is set to <code>attachment</code>.</p>
+
+<h3>
+<a id="getting-the-decoded-content-of-a-mime-part" class="anchor" href="#getting-the-decoded-content-of-a-mime-part" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting the Decoded Content of a MIME Part</h3>
+
+<p>At some point, you're going to want to extract the decoded content of a <code>MimePart</code> (such as an image) and
+save it to disk or feed it to a UI control to display it.</p>
+
+<p>Once you've found the <code>MimePart</code> object that you'd like to extract the content of, here's how you can
+save the decoded content to a file:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-c">// This will get the name of the file as specified by the sending mail client.</span>
+<span class="pl-c">// Note: this value *may* be null, so you'll want to handle that case in your code.</span>
+<span class="pl-k">var</span> fileName = part.FileName;
+
+<span class="pl-k">using</span> (<span class="pl-k">var</span> stream = File.Create (fileName)) {
+    part.ContentObject.DecodeTo (stream);
+}</pre></div>
+
+<p>You can also get access to the original raw content by "opening" the <code>ContentObject</code>. This might be useful
+if you want to pass the content off to a UI control that can do its own loading from a stream.</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">using</span> (<span class="pl-k">var</span> stream = part.ContentObject.Open ()) {
+    <span class="pl-c">// At this point, you can now read from the stream as if it were the original,</span>
+    <span class="pl-c">// raw content. Assuming you have an image UI control that could load from a</span>
+    <span class="pl-c">// stream, you could do something like this:</span>
+    imageControl.Load (stream);
+}</pre></div>
+
+<p>There are a number of useful filters that can be applied to a <code>FilteredStream</code>, so if you find this type of
+interface appealing, I suggest taking a look at the available filters in the <code>MimeKit.IO.Filters</code> namespace
+or even write your own! The possibilities are limited only by your imagination.</p>
+
+<h3>
+<a id="creating-a-simple-message" class="anchor" href="#creating-a-simple-message" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a Simple Message</h3>
+
+<p>Creating MIME messages using MimeKit is really trivial.</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> message = <span class="pl-k">new</span> MimeMessage ();
+message.From.Add (<span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Joey<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>joey@friends.com<span class="pl-pds">"</span></span>));
+message.To.Add (<span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Alice<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>alice@wonderland.com<span class="pl-pds">"</span></span>));
+message.Subject = <span class="pl-s"><span class="pl-pds">"</span>How you doin?<span class="pl-pds">"</span></span>;
+
+message.Body = <span class="pl-k">new</span> TextPart (<span class="pl-s"><span class="pl-pds">"</span>plain<span class="pl-pds">"</span></span>) {
+    Text = @<span class="pl-s"><span class="pl-pds">"</span>Hey Alice,</span>
+<span class="pl-s"></span>
+<span class="pl-s">What are you up to this weekend? Monica is throwing one of her parties on</span>
+<span class="pl-s">Saturday and I was hoping you could make it.</span>
+<span class="pl-s"></span>
+<span class="pl-s">Will you be my +1?</span>
+<span class="pl-s"></span>
+<span class="pl-s">-- Joey</span>
+<span class="pl-s"><span class="pl-pds">"</span></span>
+};</pre></div>
+
+<p>A <code>TextPart</code> is a leaf-node MIME part with a text media-type. The first argument to the <code>TextPart</code> constructor
+specifies the media-subtype, in this case, "plain". Another media subtype you are probably familiar with
+is the "html" subtype. Some other examples include "enriched", "rtf", and "csv".</p>
+
+<p>The <code>Text</code> property is the easiest way to both get and set the string content of the MIME part.</p>
+
+<h3>
+<a id="creating-a-message-with-attachments" class="anchor" href="#creating-a-message-with-attachments" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a Message with Attachments</h3>
+
+<p>Attachments are just like any other <code>MimePart</code>, the only difference is that they typically have
+a Content-Disposition header with a value of "attachment" instead of "inline" or no
+Content-Disposition header at all.</p>
+
+<p>Typically, when a mail client adds attachments to a message, it will create a multipart/mixed
+part and add the text body part and all of the file attachments to the multipart/mixed.</p>
+
+<p>Here's how you can do that with MimeKit:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> message = <span class="pl-k">new</span> MimeMessage ();
+message.From.Add (<span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Joey<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>joey@friends.com<span class="pl-pds">"</span></span>));
+message.To.Add (<span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Alice<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>alice@wonderland.com<span class="pl-pds">"</span></span>));
+message.Subject = <span class="pl-s"><span class="pl-pds">"</span>How you doin?<span class="pl-pds">"</span></span>;
+
+<span class="pl-c">// create our message text, just like before (except don't set it as the message.Body)</span>
+<span class="pl-k">var</span> body = <span class="pl-k">new</span> TextPart (<span class="pl-s"><span class="pl-pds">"</span>plain<span class="pl-pds">"</span></span>) {
+    Text = @<span class="pl-s"><span class="pl-pds">"</span>Hey Alice,</span>
+<span class="pl-s"></span>
+<span class="pl-s">What are you up to this weekend? Monica is throwing one of her parties on</span>
+<span class="pl-s">Saturday and I was hoping you could make it.</span>
+<span class="pl-s"></span>
+<span class="pl-s">Will you be my +1?</span>
+<span class="pl-s"></span>
+<span class="pl-s">-- Joey</span>
+<span class="pl-s"><span class="pl-pds">"</span></span>
+};
+
+<span class="pl-c">// create an image attachment for the file located at path</span>
+<span class="pl-k">var</span> attachment = <span class="pl-k">new</span> MimePart (<span class="pl-s"><span class="pl-pds">"</span>image<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>gif<span class="pl-pds">"</span></span>) {
+    ContentObject = <span class="pl-k">new</span> ContentObject (File.OpenRead (path), ContentEncoding.Default),
+    ContentDisposition = <span class="pl-k">new</span> ContentDisposition (ContentDisposition.Attachment),
+    ContentTransferEncoding = ContentEncoding.Base64,
+    FileName = Path.GetFileName (path)
+};
+
+<span class="pl-c">// now create the multipart/mixed container to hold the message text and the</span>
+<span class="pl-c">// image attachment</span>
+<span class="pl-k">var</span> multipart = <span class="pl-k">new</span> Multipart (<span class="pl-s"><span class="pl-pds">"</span>mixed<span class="pl-pds">"</span></span>);
+multipart.Add (body);
+multipart.Add (attachment);
+
+<span class="pl-c">// now set the multipart/mixed as the message body</span>
+message.Body = multipart;</pre></div>
+
+<p>Of course, that is just a simple example. A lot of modern mail clients such as Outlook or Thunderbird will 
+send out both a text/html and a text/plain version of the message text. To do this, you'd create a <code>TextPart</code>
+for the text/plain part and a <code>TextPart</code> for the text/html part and then add them to a multipart/alternative
+like so:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> attachment = CreateAttachment ();
+<span class="pl-k">var</span> plain = CreateTextPlainPart ();
+<span class="pl-k">var</span> html = CreateTextHtmlPart ();
+
+<span class="pl-c">// Note: it is important that the text/html part is added second, because it is the</span>
+<span class="pl-c">// most expressive version and (probably) the most faithful to the sender's WYSIWYG </span>
+<span class="pl-c">// editor.</span>
+<span class="pl-k">var</span> alternative = <span class="pl-k">new</span> Multipart (<span class="pl-s"><span class="pl-pds">"</span>alternative<span class="pl-pds">"</span></span>);
+alternative.Add (plain);
+alternative.Add (html);
+
+<span class="pl-c">// now create the multipart/mixed container to hold the multipart/alternative</span>
+<span class="pl-c">// and the image attachment</span>
+<span class="pl-k">var</span> multipart = <span class="pl-k">new</span> Multipart (<span class="pl-s"><span class="pl-pds">"</span>mixed<span class="pl-pds">"</span></span>);
+multipart.Add (alternative);
+multipart.Add (attachment);
+
+<span class="pl-c">// now set the multipart/mixed as the message body</span>
+message.Body = multipart;</pre></div>
+
+<h3>
+<a id="creating-a-message-using-a-bodybuilder-not-arnold-schwarzenegger" class="anchor" href="#creating-a-message-using-a-bodybuilder-not-arnold-schwarzenegger" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a Message Using a BodyBuilder (not Arnold Schwarzenegger)</h3>
+
+<p>If you are used to System.Net.Mail's API for creating messages, you will probably find using a <code>BodyBuilder</code>
+much more friendly than manually creating the tree of MIME parts. Here's how you could create a message body
+using a <code>BodyBuilder</code>:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> message = <span class="pl-k">new</span> MimeMessage ();
+message.From.Add (<span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Joey<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>joey@friends.com<span class="pl-pds">"</span></span>));
+message.To.Add (<span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Alice<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>alice@wonderland.com<span class="pl-pds">"</span></span>));
+message.Subject = <span class="pl-s"><span class="pl-pds">"</span>How you doin?<span class="pl-pds">"</span></span>;
+
+<span class="pl-k">var</span> builder = <span class="pl-k">new</span> BodyBuilder ();
+
+<span class="pl-c">// Set the plain-text version of the message text</span>
+builder.TextBody = @<span class="pl-s"><span class="pl-pds">"</span>Hey Alice,</span>
+<span class="pl-s"></span>
+<span class="pl-s">What are you up to this weekend? Monica is throwing one of her parties on</span>
+<span class="pl-s">Saturday and I was hoping you could make it.</span>
+<span class="pl-s"></span>
+<span class="pl-s">Will you be my +1?</span>
+<span class="pl-s"></span>
+<span class="pl-s">-- Joey</span>
+<span class="pl-s"><span class="pl-pds">"</span></span>;
+
+<span class="pl-c">// Set the html version of the message text</span>
+builder.HtmlBody = @<span class="pl-s"><span class="pl-pds">"</span>&lt;p&gt;Hey Alice,&lt;br&gt;</span>
+<span class="pl-s">&lt;p&gt;What are you up to this weekend? Monica is throwing one of her parties on</span>
+<span class="pl-s">Saturday and I was hoping you could make it.&lt;br&gt;</span>
+<span class="pl-s">&lt;p&gt;Will you be my +1?&lt;br&gt;</span>
+<span class="pl-s">&lt;p&gt;-- Joey&lt;br&gt;</span>
+<span class="pl-s">&lt;center&gt;&lt;img src=<span class="pl-pds">"</span><span class="pl-pds">"</span>sexy-pose.jpg<span class="pl-pds">"</span><span class="pl-pds">"</span>&gt;&lt;/center&gt;<span class="pl-pds">"</span></span>;
+
+<span class="pl-c">// Since sexy-pose.jpg is referenced from the html text, we'll need to add it</span>
+<span class="pl-c">// to builder.LinkedResources</span>
+builder.LinkedResources.Add (<span class="pl-s"><span class="pl-pds">"</span>C:<span class="pl-cce">\\</span>Users<span class="pl-cce">\\</span>Joey<span class="pl-cce">\\</span>Documents<span class="pl-cce">\\</span>SexySelfies<span class="pl-cce">\\</span>sexy-pose.jpg<span class="pl-pds">"</span></span>);
+
+<span class="pl-c">// We may also want to attach a calendar event for Monica's party...</span>
+builder.Attachments.Add (<span class="pl-s"><span class="pl-pds">"</span>C:<span class="pl-cce">\\</span>Users<span class="pl-cce">\J</span>oey<span class="pl-cce">\\</span>Documents<span class="pl-cce">\\</span>party.ics<span class="pl-pds">"</span></span>);
+
+<span class="pl-c">// Now we just need to set the message body and we're done</span>
+message.Body = builder.ToMessageBody ();</pre></div>
+
+<h3>
+<a id="preparing-to-use-mimekits-smime-support" class="anchor" href="#preparing-to-use-mimekits-smime-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Preparing to use MimeKit's S/MIME support</h3>
+
+<p>Before you can begin using MimeKit's S/MIME support, you will need to decide which
+database to use for certificate storage.</p>
+
+<p>If you are targetting any of the Xamarin platforms (or Linux), you won't need to do
+anything (although you certianly can if you want to) because, by default, I've
+configured MimeKit to use the Mono.Data.Sqlite binding to SQLite.</p>
+
+<p>If you are, however, on any of the Windows platforms, you'll need to pick a System.Data
+provider such as <a href="https://www.nuget.org/packages/System.Data.SQLite">System.Data.SQLite</a>.
+Once you've made your choice and installed it (via NuGet or however), you'll need to
+implement your own <code>SecureMimeContext</code> subclass. Luckily, it's very simple to do. Assuming
+you've chosen System.Data.SQLite, here's how you'd implement your own <code>SecureMimeContext</code>
+class:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">using</span> System.Data.SQLite;
+<span class="pl-k">using</span> MimeKit.Cryptography;
+
+<span class="pl-k">using</span> MyAppNamespace {
+    <span class="pl-k">class</span> <span class="pl-en">MySecureMimeContext</span> : <span class="pl-k">DefaultSecureMimeContext</span>
+    {
+        <span class="pl-k">public</span> <span class="pl-en">MySecureMimeContext</span> () : <span class="pl-c1">base</span> (OpenDatabase ("C:\\wherever\\certdb.sqlite"))
+        {
+        }
+
+        <span class="pl-k">static</span> IX509CertificateDatabase <span class="pl-en">OpenDatabase</span> (<span class="pl-k">string</span> <span class="pl-smi">fileName</span>)
+        {
+            <span class="pl-k">var</span> builder = <span class="pl-k">new</span> SQLiteConnectionStringBuilder ();
+            builder.DateTimeFormat = SQLiteDateFormats.Ticks;
+            builder.DataSource = fileName;
+
+            <span class="pl-k">if</span> (!File.Exists (fileName))
+                SQLiteConnection.CreateFile (fileName);
+
+            <span class="pl-k">var</span> sqlite = <span class="pl-k">new</span> SQLiteConnection (builder.ConnectionString);
+            sqlite.Open ();
+
+            <span class="pl-k">return</span> <span class="pl-k">new</span> SqliteCertificateDatabase (sqlite, <span class="pl-s"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span>);
+        }
+    }
+}</pre></div>
+
+<p>Now that you've implemented your own <code>SecureMimeContext</code>, you'll want to register it with MimeKit:</p>
+
+<div class="highlight highlight-csharp"><pre>CryptographyContext.Register (<span class="pl-k">typeof</span> (MySecureMimeContext));</pre></div>
+
+<p>Now you are ready to encrypt, decrypt, sign and verify S/MIME messages!</p>
+
+<h3>
+<a id="preparing-to-use-mimekits-pgpmime-support" class="anchor" href="#preparing-to-use-mimekits-pgpmime-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Preparing to use MimeKit's PGP/MIME support</h3>
+
+<p>Like with S/MIME support, you also need to register your own <code>OpenPgpContext</code>. Unlike S/MIME, however,
+you don't need to choose a database if you subclass <code>GnuPGContext</code> because it uses GnuPG's PGP keyrings
+to load and store public and private keys. If you choose to subclass <code>GnuPGContext</code>, the only thing you
+you need to do is implement a password callback method:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">using</span> MimeKit.Cryptography;
+
+<span class="pl-k">namespace</span> <span class="pl-en">MyAppNamespace</span> {
+    <span class="pl-k">class</span> <span class="pl-en">MyGnuPGContext</span> : <span class="pl-k">GnuPGContext</span>
+    {
+        <span class="pl-k">public</span> <span class="pl-en">MyGnuPgContext</span> () : <span class="pl-c1">base</span> ()
+        {
+        }
+
+        <span class="pl-k">protected</span> <span class="pl-k">override</span> <span class="pl-k">string</span> <span class="pl-en">GetPasswordForKey</span> (<span class="pl-k">PgpSecretKey</span> <span class="pl-smi">key</span>)
+        {
+            <span class="pl-c">// prompt the user (or a secure password cache) for the password for the specified secret key.</span>
+            <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span>;
+        }
+    }
+}</pre></div>
+
+<p>Once again, to register your <code>OpenPgpContext</code>, you can use the following code snippet:</p>
+
+<div class="highlight highlight-csharp"><pre>CryptographyContext.Register (<span class="pl-k">typeof</span> (MyGnuPGContext));</pre></div>
+
+<p>Now you are ready to encrypt, decrypt, sign and verify PGP/MIME messages!</p>
+
+<h3>
+<a id="encrypting-messages-with-smime" class="anchor" href="#encrypting-messages-with-smime" aria-hidden="true"><span class="octicon octicon-link"></span></a>Encrypting Messages with S/MIME</h3>
+
+<p>S/MIME uses an application/pkcs7-mime MIME part to encapsulate encrypted content (as well as other things).</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> joey = <span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Joey<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>joey@friends.com<span class="pl-pds">"</span></span>);
+<span class="pl-k">var</span> alice = <span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Alice<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>alice@wonderland.com<span class="pl-pds">"</span></span>);
+
+<span class="pl-k">var</span> message = <span class="pl-k">new</span> MimeMessage ();
+message.From.Add (joey);
+message.To.Add (alice);
+message.Subject = <span class="pl-s"><span class="pl-pds">"</span>How you doin?<span class="pl-pds">"</span></span>;
+
+<span class="pl-c">// create our message body (perhaps a multipart/mixed with the message text and some</span>
+<span class="pl-c">// image attachments, for example)</span>
+<span class="pl-k">var</span> body = CreateMessageBody ();
+
+<span class="pl-c">// now to encrypt our message body using our custom S/MIME cryptography context</span>
+<span class="pl-k">using</span> (<span class="pl-k">var</span> ctx = <span class="pl-k">new</span> MySecureMimeContext ()) {
+    <span class="pl-c">// Note: this assumes that "Alice" has an S/MIME certificate with an X.509</span>
+    <span class="pl-c">// Subject Email identifier that matches her email address. If she doesn't,</span>
+    <span class="pl-c">// try using a SecureMailboxAddress which allows you to specify the</span>
+    <span class="pl-c">// fingerprint of her certificate to use for lookups.</span>
+    message.Body = ApplicationPkcs7Mime.Encrypt (ctx, message.To.Mailboxes, body);
+}</pre></div>
+
+<h3>
+<a id="decrypting-smime-messages" class="anchor" href="#decrypting-smime-messages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Decrypting S/MIME Messages</h3>
+
+<p>As mentioned earlier, S/MIME uses an application/pkcs7-mime part with an "smime-type" parameter with a value of
+"enveloped-data" to encapsulate the encrypted content.</p>
+
+<p>The first thing you must do is find the ApplicationPkcs7Mime part (see the section on traversing MIME parts).</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">if</span> (entity <span class="pl-k">is</span> ApplicationPkcs7Mime) {
+    <span class="pl-k">var</span> pkcs7 = (ApplicationPkcs7Mime) entity;
+
+    <span class="pl-k">if</span> (pkcs7.SecureMimeType == SecureMimeType.EnvelopedData)
+        <span class="pl-k">return</span> pkcs7.Decrypt ();
+}</pre></div>
+
+<h3>
+<a id="encrypting-messages-with-pgpmime" class="anchor" href="#encrypting-messages-with-pgpmime" aria-hidden="true"><span class="octicon octicon-link"></span></a>Encrypting Messages with PGP/MIME</h3>
+
+<p>Unlike S/MIME, PGP/MIME uses multipart/encrypted to encapsulate its encrypted data.</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> joey = <span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Joey<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>joey@friends.com<span class="pl-pds">"</span></span>);
+<span class="pl-k">var</span> alice = <span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Alice<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>alice@wonderland.com<span class="pl-pds">"</span></span>);
+
+<span class="pl-k">var</span> message = <span class="pl-k">new</span> MimeMessage ();
+message.From.Add (joey);
+message.To.Add (alice);
+message.Subject = <span class="pl-s"><span class="pl-pds">"</span>How you doin?<span class="pl-pds">"</span></span>;
+
+<span class="pl-c">// create our message body (perhaps a multipart/mixed with the message text and some</span>
+<span class="pl-c">// image attachments, for example)</span>
+<span class="pl-k">var</span> body = CreateMessageBody ();
+
+<span class="pl-c">// now to encrypt our message body using our custom PGP/MIME cryptography context</span>
+<span class="pl-k">using</span> (<span class="pl-k">var</span> ctx = <span class="pl-k">new</span> MyGnuPGContext ()) {
+    <span class="pl-c">// Note: this assumes that "Alice" has a public PGP key that matches her email</span>
+    <span class="pl-c">// address. If she doesn't, try using a SecureMailboxAddress which allows you</span>
+    <span class="pl-c">// to specify the fingerprint of her public PGP key to use for lookups.</span>
+    message.Body = MultipartEncrypted.Encrypt (ctx, message.To.Mailboxes, body);
+}</pre></div>
+
+<h3>
+<a id="decrypting-pgpmime-messages" class="anchor" href="#decrypting-pgpmime-messages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Decrypting PGP/MIME Messages</h3>
+
+<p>As mentioned earlier, PGP/MIME uses a multipart/encrypted part to encapsulate the encrypted content.</p>
+
+<p>A multipart/encrtpted contains exactly 2 parts: the first <code>MimeEntity</code> is the version information while the
+second <code>MimeEntity</code> is the actual encrypted content and will typically be an application/octet-stream.</p>
+
+<p>The first thing you must do is find the <code>MultipartEncrypted</code> part (see the section on traversing MIME parts).</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">if</span> (entity <span class="pl-k">is</span> MultipartEncrypted) {
+    <span class="pl-k">var</span> encrypted = (MultipartEncrypted) entity;
+
+    <span class="pl-k">return</span> encrypted.Decrypt ();
+}</pre></div>
+
+<h3>
+<a id="digitally-signing-messages-with-smime-or-pgpmime" class="anchor" href="#digitally-signing-messages-with-smime-or-pgpmime" aria-hidden="true"><span class="octicon octicon-link"></span></a>Digitally Signing Messages with S/MIME or PGP/MIME</h3>
+
+<p>Both S/MIME and PGP/MIME use a multipart/signed to contain the signed content and the detached signature data.</p>
+
+<p>Here's how you might digitally sign a message using S/MIME:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">var</span> joey = <span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Joey<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>joey@friends.com<span class="pl-pds">"</span></span>);
+<span class="pl-k">var</span> alice = <span class="pl-k">new</span> MailboxAddress (<span class="pl-s"><span class="pl-pds">"</span>Alice<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>alice@wonderland.com<span class="pl-pds">"</span></span>);
+
+<span class="pl-k">var</span> message = <span class="pl-k">new</span> MimeMessage ();
+message.From.Add (joey);
+message.To.Add (alice);
+message.Subject = <span class="pl-s"><span class="pl-pds">"</span>How you doin?<span class="pl-pds">"</span></span>;
+
+<span class="pl-c">// create our message body (perhaps a multipart/mixed with the message text and some</span>
+<span class="pl-c">// image attachments, for example)</span>
+<span class="pl-k">var</span> body = CreateMessageBody ();
+
+<span class="pl-c">// now to digitally sign our message body using our custom S/MIME cryptography context</span>
+<span class="pl-k">using</span> (<span class="pl-k">var</span> ctx = <span class="pl-k">new</span> MySecureMimeContext ()) {
+    <span class="pl-c">// Note: this assumes that "Joey" has an S/MIME signing certificate and private key</span>
+    <span class="pl-c">// with an X.509 Subject Email identifier that matches Joey's email address.</span>
+    message.Body = MultipartSigned.Create (ctx, joey, DigestAlgorithm.Sha1, body);
+}</pre></div>
+
+<p>For S/MIME, if you have a way for the user to configure which S/MIME certificate to use
+as their signing certificate, you could also do something more like this:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-c">// now to digitally sign our message body using our custom S/MIME cryptography context</span>
+<span class="pl-k">using</span> (<span class="pl-k">var</span> ctx = <span class="pl-k">new</span> MySecureMimeContext ()) {
+    <span class="pl-k">var</span> certificate = GetJoeysX509Certificate ();
+    <span class="pl-k">var</span> signer = <span class="pl-k">new</span> CmsSigner (certificate);
+    signer.DigestAlgorithm = DigestAlgorithm.Sha1;
+
+    message.Body = MultipartSigned.Create (ctx, signer, body);
+}</pre></div>
+
+<p>If you'd prefer to use PGP instead of S/MIME, things work almost exactly the same except that you
+would use an OpenPGP cryptography context. For example, you might use a subclass of the
+<code>GnuPGContext</code> that comes with MimeKit if you want to re-use the user's GnuPG keyrings (you can't
+use <code>GnuPGContext</code> directly because it has no way of prompting the user for their passphrase).</p>
+
+<p>For the sake of this example, let's pretend that you've written a minimal subclass of
+<code>MimeKit.Cryptography.GnuPGContext</code> that simply overrides the <code>GetPassword()</code> method and
+that this subclass is called <code>MyGnuPGContext</code>.</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-c">// now to digitally sign our message body using our custom OpenPGP cryptography context</span>
+<span class="pl-k">using</span> (<span class="pl-k">var</span> ctx = <span class="pl-k">new</span> MyGnuPGContext ()) {
+    <span class="pl-c">// Note: this assumes that "Joey" has a PGP key that matches his email address.</span>
+    message.Body = MultipartSigned.Create (ctx, joey, DigestAlgorithm.Sha1, body);
+}</pre></div>
+
+<p>Just like S/MIME, however, you can also do your own PGP key lookups instead of
+relying on email addresses to match up with the user's private key.</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-c">// now to digitally sign our message body using our custom OpenPGP cryptography context</span>
+<span class="pl-k">using</span> (<span class="pl-k">var</span> ctx = <span class="pl-k">new</span> MyGnuPGContext ()) {
+    <span class="pl-k">var</span> key = GetJoeysPrivatePgpKey ();
+    message.Body = MultipartSigned.Create (ctx, key, DigestAlgorithm.Sha1, body);
+}</pre></div>
+
+<h3>
+<a id="verifying-smime-and-pgpmime-digital-signatures" class="anchor" href="#verifying-smime-and-pgpmime-digital-signatures" aria-hidden="true"><span class="octicon octicon-link"></span></a>Verifying S/MIME and PGP/MIME Digital Signatures</h3>
+
+<p>As mentioned earlier, both S/MIME and PGP/MIME typically use a multipart/signed part to contain the
+signed content and the detached signature data.</p>
+
+<p>A multipart/signed contains exactly 2 parts: the first <code>MimeEntity</code> is the signed content while the second
+<code>MimeEntity</code> is the detached signature and, by default, will either be an <code>ApplicationPgpSignature</code> part or
+an <code>ApplicationPkcs7Signature</code> part (depending on whether the sending client signed using OpenPGP or S/MIME).</p>
+
+<p>Because the multipart/signed part may have been signed by multiple signers, it is important to
+verify each of the digital signatures (one for each signer) that are returned by the
+<code>MultipartSigned.Verify()</code> method:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">if</span> (entity <span class="pl-k">is</span> MultipartSigned) {
+    <span class="pl-k">var</span> signed = (MultipartSigned) entity;
+
+    <span class="pl-k">foreach</span> (<span class="pl-k">var</span> signature <span class="pl-k">in</span> signed.Verify ()) {
+        <span class="pl-k">try</span> {
+            <span class="pl-k">bool</span> valid = signature.Verify ();
+
+            <span class="pl-c">// If valid is true, then it signifies that the signed content has not been</span>
+            <span class="pl-c">// modified since this particular signer signed the content.</span>
+            <span class="pl-c">//</span>
+            <span class="pl-c">// However, if it is false, then it indicates that the signed content has</span>
+            <span class="pl-c">// been modified.</span>
+        } <span class="pl-k">catch</span> (DigitalSignatureVerifyException) {
+            <span class="pl-c">// There was an error verifying the signature.</span>
+        }
+    }
+}</pre></div>
+
+<p>It should be noted, however, that while most S/MIME clients will use the preferred multipart/signed
+approach, it is possible that you may encounter an application/pkcs7-mime part with an "smime-type"
+parameter set to "signed-data". Luckily, MimeKit can handle this format as well:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-k">if</span> (entity <span class="pl-k">is</span> ApplicationPkcs7Mime) {
+    <span class="pl-k">var</span> pkcs7 = (ApplicationPkcs7Mime) entity;
+
+    <span class="pl-k">if</span> (pkcs7.SecureMimeType == SecureMimeType.SignedData) {
+        <span class="pl-c">// extract the original content and get a list of signatures</span>
+        MimeEntity extracted;
+
+        <span class="pl-c">// Note: if you are rendering the message, you'll want to render the</span>
+        <span class="pl-c">// extracted mime part rather than the application/pkcs7-mime part.</span>
+        <span class="pl-k">foreach</span> (<span class="pl-k">var</span> signature <span class="pl-k">in</span> pkcs7.Verify (out extracted)) {
+            <span class="pl-k">try</span> {
+                <span class="pl-k">bool</span> valid = signature.Verify ();
+
+                <span class="pl-c">// If valid is true, then it signifies that the signed content has not</span>
+                <span class="pl-c">// been modified since this particular signer signed the content.</span>
+                <span class="pl-c">//</span>
+                <span class="pl-c">// However, if it is false, then it indicates that the signed content</span>
+                <span class="pl-c">// has been modified.</span>
+            } <span class="pl-k">catch</span> (DigitalSignatureVerifyException) {
+                <span class="pl-c">// There was an error verifying the signature.</span>
+            }
+        }
+    }
+}</pre></div>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>The first thing you'll need to do is fork MimeKit to your own GitHub repository. Once you do that,</p>
+
+<pre><code>git clone git@github.com/&lt;your-account&gt;/MimeKit.git
+</code></pre>
+
+<p>If you use <a href="http://xamarin.com/studio">Xamarin Studio</a> or <a href="http://monodevelop.com">MonoDevelop</a>, all of the
+solution files are configured with the coding style used by MimeKit. If you use Visual Studio or some
+other editor, please try to maintain the existing coding style as best as you can.</p>
+
+<p>Once you've got some changes that you'd like to submit upstream to the official MimeKit repository,
+simply send me a Pull Request and I will try to review your changes in a timely manner.</p>
+
+<p>If you'd like to contribute but don't have any particular features in mind to work on, check out the issue
+tracker and look for something that might pique your interest!</p>
+
+<h2>
+<a id="donate" class="anchor" href="#donate" aria-hidden="true"><span class="octicon octicon-link"></span></a>Donate</h2>
+
+<p>MimeKit is a personal open source project that I have put thousands of hours into perfecting with the
+goal of making it not only the very best MIME parser framework for .NET, but the best MIME parser
+framework for any programming language. I need your help to achieve this.</p>
+
+<p><a href="http://www.pledgie.com/campaigns/29300" target="_blank">
+  <img src="http://www.pledgie.com/campaigns/29300.png?skin_name=chrome" alt="Click here to lend your support to MimeKit and MailKit by making a donation via pledgie.com!" border="0">
+</a></p>
+
+<h2>
+<a id="reporting-bugs" class="anchor" href="#reporting-bugs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reporting Bugs</h2>
+
+<p>Have a bug or a feature request? <a href="https://github.com/jstedfast/MimeKit/issues">Please open a new issue</a>.</p>
+
+<p>Before opening a new issue, please search for existing issues to avoid submitting duplicates.</p>
+
+<h2>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
+
+<p>API documentation can be found at <a href="http://mimekit.net/docs">http://mimekit.net/docs</a>.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/jstedfast/MimeKit/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/jstedfast/MimeKit/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/jstedfast/MimeKit"></a> is maintained by <a href="https://github.com/jstedfast">jstedfast</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-63841238-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
