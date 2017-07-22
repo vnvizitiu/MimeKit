@@ -1,5 +1,19 @@
 # Release Notes
 
+### MimeKit 1.16.2
+
+* Fixed a bug in the MailMessage to MimeMessage conversion which corrupted the Subject string. (issue #306)
+* If no KeyUsage extension exists for an X509 certificate, assume no restrictions on key usage.
+* Throw an exception if there is a problem building an X509 certificate chain when verifying
+  S/MIME signatures.
+
+### MimeKit 1.16.1
+
+* Fixed TextToHtml and FlowedToHtml's OutputHtmlFragment property to work.
+* Fixed EncodeAddrspec and DecodeAddrspec to handle string.Empty. (issue #302)
+* Allow string.Empty as a valid addrspec for MailboxAddress. (issue #302)
+* Catch exceptions trying to import CRLs and Certs when verifying S/MIME signatures. (issue #304)
+
 ### MimeKit 1.16.0
 
 * Added new ParserOptions option to allow local-only mailbox addresses (e.g. no @domain).
